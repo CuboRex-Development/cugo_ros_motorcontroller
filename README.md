@@ -3,9 +3,6 @@ CuGoをROSで制御する際、ROS開発キットに付属するArduinoのリフ
 ROSpkgのリポジトリはこちら：  
 English Documents here：  
  
-# DEMO
-動画を貼る。なければDEMOはナシ。
-
 # Features
 CuGo-ROS-Controller-pkgと使うと/cmd_velのベクトルでCuGoの制御を行います。  
 また、遠隔操作ロボットキット付属のMC-8のプロポを用いて、RC操作と自律走行の切り替えを実施できます。RC-MODEに切り替えることで
@@ -48,20 +45,20 @@ unsigned int localPort = 8888;      // 8888番ポートを聞いて待つ
 
 // PID ゲイン調整
 // L側
-//const float L_KP = 1.5;  CuGoV3
-//const float L_KI = 0.02; CuGoV3
-//const float L_KD = 0.1;  CuGoV3
-const float L_KP = 1.0;
-const float L_KI = 0.06;
-const float L_KD = 0.1;
+//const float L_KP = 1.5;  // CuGoV3
+//const float L_KI = 0.02; // CuGoV3
+//const float L_KD = 0.1;  // CuGoV3
+const float L_KP = 1.0;    // MEGA
+const float L_KI = 0.06;   // MEGA
+const float L_KD = 0.1;    // MEGA
 
 // R側
-const float R_KP = 1.0;
-const float R_KI = 0.06;
-const float R_KD = 0.1;
-//const float R_KP = 1.5;  CuGoV3
-//const float R_KI = 0.02; CuGoV3
-//const float R_KD = 0.1;  CuGoV3
+const float R_KP = 1.0;    // MEGA
+const float R_KI = 0.06;   // MEGA
+const float R_KD = 0.1;    // MEGA
+//const float R_KP = 1.5;  // CuGoV3
+//const float R_KI = 0.02; // CuGoV3
+//const float R_KD = 0.1;  // CuGoV3
 
 // ローパスフィルタ
 const float L_LPF = 0.95;
@@ -77,16 +74,7 @@ const bool R_reverse = false;
 クローラ走行の振動が非常に大きいので、RJ45端子のEthernetケーブルでの通信 / WiFi接続による通信をお勧めします。　　
 シリアル通信ものちに対応予定です。
  
-# Author
- 
-作成情報を列挙する
- 
-* 作成者
-* CuboRex Co,. Ltd.
-* E-mail
  
 # License
-ライセンスを明示する
- 
-"hoge" is under [MIT license](https://en.wikipedia.org/wiki/MIT_License).
+このプロジェクトはApache License 2.0のもと、公開されています。詳細はLICENSEをご覧ください。
  
