@@ -1,6 +1,6 @@
 # cugo-ros-arduinodriver
 CuGoをROSで制御する際、ROS開発キットに付属するArduinoのリファレンススケッチです。セットでROSアプリと同時に使用します。  
-ROSpkgのリポジトリはこちら：  
+ROSpkgのリポジトリはこちら：https://github.com/CuboRex-Development/cugo-ros-controller.git  
 English Documents here：   
 正式リリースするまでは、beta branchで管理しますので、そちらをご参照ください。
  
