@@ -75,8 +75,8 @@ void MotorController::driveMotor(){
 void MotorController::reset_PID_param()
 {
   speed_ = 0;
-  //enc_ = 0;
-  //prev_enc_ = 0;
+  enc_ = 0; //Cugoびくつき修正:23/02/12
+  prev_enc_ = 0;  //Cugoびくつき修正:23/02/12
   rpm_ = 0.0;
   prev_rpm_ = 0.0;
   target_rpm_ = 0.0;
