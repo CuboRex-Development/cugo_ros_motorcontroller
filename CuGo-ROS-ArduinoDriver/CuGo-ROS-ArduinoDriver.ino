@@ -14,7 +14,7 @@ bool PID_CONTROLL_DISPLAY = false;
 bool FAIL_SAFE_DISPLAY = true;
 
 // Ethernet Shield に印刷されている6桁の番号を入れてください。なお、ロボット内ローカル環境動作なので、そのままでもOK。
-byte mac[] = {0x02, 0x00, 0x00, 0x00, 0x00, 0x00};  // お持ちのArduinoShield相当の端末のアドレスを記入
+byte mac[] = {0xA8, 0x61, 0x0A, 0xAE, 0x73, 0x1A};  // お持ちのArduinoShield相当の端末のアドレスを記入
 
 // ROSアプリケーションと同じ値にしてください。
 IPAddress ip(192, 168, 8, 216);     // Arduinoのアドレス。LAN内でかぶらない値にすること。
@@ -47,11 +47,23 @@ const bool R_reverse = false;
 
 /***** ↑各ユーザーごとに設定してください↑ *****/
 
-#define UDP_BUFF_SIZE 256
+#define UDP_BUFF_SIZE 256 // UDP string用のバッファサイズ
+#define UDP_BIN_BUFF_SIZE 64 // UDP binary用のバッファ(body)サイズ
+#define UDP_HEADER_SIZE 8 // UDP binary用のheaderサイズ
 //char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; // 来たメッセージのサイズだけ確保。送る側で大きすぎるものは送らないものとする
-char packetBuffer[UDP_BUFF_SIZE];
+char packetBuffer[UDP_BUFF_SIZE]; // UDP string用のバッファ
+uint8_t packetBinaryBuffer[UDP_BIN_BUFF_SIZE]; // UDP binary用のバッファ
 char ReplyBuffer[] = "Initial Buffer Value!";      // 初期値。これが通常通信できたらバグ。
 EthernetUDP Udp;
+
+// 受信バッファ
+#define RECV_HEADER_CHECKSUM_PTR 6 // ヘッダ チェックサム
+#define TARGET_RPM_L_PTR 0 // 左モータ目標RPM
+#define TARGET_RPM_R_PTR 4 // 右モータ目標RPM
+
+// 送信バッファ
+#define SEND_ENCODER_L_PTR 0 // 左エンコーダ回転数
+#define SEND_ENCODER_R_PTR 4 // 右エンコーダ回転数
 
 #define PIN_MOTOR_L A1  // モータ出力ピン(L)
 #define PIN_MOTOR_R A0  // モータ出力ピン(R)
@@ -292,10 +304,10 @@ void display_failsafe()
   if (FAIL_SAFE_DISPLAY == true)
   {
     Serial.println("DISPLAY FAIL SAFE PARAM");
-    
+
     Serial.print("Mode(ROS/RC): ");
     Serial.println(runMode);
-    
+
     Serial.print("UDP recieve fail count: ");
     Serial.println(UDP_FAIL_COUNT);
 
@@ -414,7 +426,7 @@ void motor_direct_instructions(int left, int right)
 {
   motor_controllers[MOTOR_LEFT].servo_.writeMicroseconds(left);
   motor_controllers[MOTOR_RIGHT].servo_.writeMicroseconds(right);
-  Serial.println("Letf: " + String(left) + ", " + String(right));
+  Serial.println("Left: " + String(left) + ", Right: " + String(right));
 }
 
 void stop_motor_immediately()
@@ -448,12 +460,55 @@ void job_100ms()
   display_speed();
   display_PID();
   display_failsafe();
+  display_target_rpm(); // デバッグ用
 }
 
 
 void job_1000ms()
 {
   display_nothing();
+}
+
+
+void write_float_to_buf(uint8_t* buf, const int TARGET, float val)
+{
+  uint8_t* val_ptr = reinterpret_cast<uint8_t*>(&val);
+  memmove(buf + TARGET, val_ptr, sizeof(float));
+}
+
+
+void write_int_to_buf(uint8_t* buf, const int TARGET, int val)
+{
+  uint8_t* val_ptr = reinterpret_cast<uint8_t*>(&val);
+  memmove(buf + TARGET, val_ptr, sizeof(int));
+}
+
+
+void write_bool_to_buf(uint8_t* buf, const int TARGET, bool val)
+{
+  uint8_t* val_ptr = reinterpret_cast<uint8_t*>(&val);
+  memmove(buf + TARGET, val_ptr, sizeof(bool));
+}
+
+
+float read_float_from_buf(uint8_t* buf, const int TARGET)
+{
+  float val = *reinterpret_cast<float*>(buf + UDP_HEADER_SIZE + TARGET);
+  return val;
+}
+
+
+int read_int_from_buf(uint8_t* buf, const int TARGET)
+{
+  int val = *reinterpret_cast<int*>(buf + UDP_HEADER_SIZE + TARGET);
+  return val;
+}
+
+
+bool read_bool_from_buf(uint8_t* buf, const int TARGET)
+{
+  bool val = *reinterpret_cast<bool*>(buf + UDP_HEADER_SIZE + TARGET);
+  return val;
 }
 
 
@@ -490,6 +545,33 @@ void set_motor_cmd(String reciev_str)
 }
 
 
+void set_motor_cmd_binary(uint8_t* reciev_buf)
+{
+  if (reciev_buf != NULL)
+  {
+    // 2輪の場合
+    float sp_reciev_float[2];
+    sp_reciev_float[0] = read_float_from_buf(reciev_buf, TARGET_RPM_L_PTR);
+    sp_reciev_float[1] = read_float_from_buf(reciev_buf, TARGET_RPM_R_PTR);
+    //split(reciev_str, ',', sp_reciev_str);
+
+    for (int i = 0; i < MOTOR_NUM; i++) {
+      motor_controllers[i].setTargetRpm(sp_reciev_float[i]);
+    }
+    /*  モータに指令値を無事セットできたら、通信失敗カウンタをリセット
+        毎回リセットすることで通常通信できる。
+        10Hzで通信しているので、100msJOBでカウンタアップ。
+    */
+    UDP_FAIL_COUNT = 0;
+  }
+  else
+  {
+    for (int i = 0; i < MOTOR_NUM; i++) {
+      motor_controllers[i].setTargetRpm(0.0);
+    }
+  }
+}
+
 String get_send_cmd_string()
 {
   String send_msg = String(motor_controllers[MOTOR_LEFT].getCount()) +
@@ -506,6 +588,31 @@ void reset_pid_gain()
   {
     motor_controllers[i].reset_PID_param();
   }
+}
+
+
+uint16_t calculate_checksum(const void* data, size_t size, size_t start = 0)
+{
+  uint16_t checksum = 0;
+  const uint8_t* bytes = static_cast<const uint8_t*>(data);
+  // バイト列を2バイトずつ加算
+  for (size_t i = start; i < size; i += 2)
+  {
+    checksum += (bytes[i] << 8) | bytes[i+1];
+  }
+  // 桁あふれがあった場合は回収
+  checksum = (checksum & 0xFFFF) + (checksum >> 16);
+  // チェックサムを反転
+  return ~checksum;
+}
+
+
+void create_UDP_packet(uint8_t* packet, uint16_t* header, uint8_t* body)
+{
+  size_t offset = 0;
+  memmove(packet, header, sizeof(uint8_t)*UDP_HEADER_SIZE);
+  offset += sizeof(uint8_t)*UDP_HEADER_SIZE;
+  memmove(packet + offset, body, sizeof(uint8_t)*UDP_BIN_BUFF_SIZE);
 }
 
 
@@ -528,6 +635,48 @@ void UDP_read_write(int packetSize)
   Udp.write(send_buff);
   Udp.endPacket();
 }
+
+
+void UDP_read_write_binary(int packetSize)
+{
+  // バッファにたまったデータを抜き出して制御に適用
+  Udp.read(packetBinaryBuffer, UDP_HEADER_SIZE + UDP_BIN_BUFF_SIZE);
+  uint16_t recv_checksum = (*(uint16_t*)(packetBinaryBuffer+RECV_HEADER_CHECKSUM_PTR));
+  uint16_t calc_checksum = calculate_checksum(packetBinaryBuffer, UDP_HEADER_SIZE + UDP_BIN_BUFF_SIZE, UDP_HEADER_SIZE);
+  if(recv_checksum != calc_checksum)
+  {
+    Serial.println("Packet integrity check failed");
+    // TODO 処理の要検討
+    // return;
+  }
+  else
+  {
+    set_motor_cmd_binary(packetBinaryBuffer);
+  }
+
+  // 送信用のデータを整理
+  // 送信ボディの作成
+  uint8_t send_body[UDP_BIN_BUFF_SIZE];
+  memset(send_body, 0, sizeof(send_body));
+  write_float_to_buf(send_body, SEND_ENCODER_L_PTR, motor_controllers[MOTOR_LEFT].getCount());
+  write_float_to_buf(send_body, SEND_ENCODER_R_PTR, motor_controllers[MOTOR_RIGHT].getCount());
+
+  uint16_t checksum = calculate_checksum(send_body, UDP_BIN_BUFF_SIZE);
+  uint16_t send_len = UDP_HEADER_SIZE + UDP_BIN_BUFF_SIZE;
+  // 送信ヘッダの作成
+  uint16_t send_header[4] = {localPort, Udp.remotePort(), send_len, checksum};
+
+  // 送信パケットの作成
+  uint8_t send_packet[send_len];
+  create_UDP_packet(send_packet, send_header, send_body);
+  display_UDP(send_len, send_packet);
+
+  // 送信された相手に対して制御結果を投げ返す。したがって相手のIPアドレスの指定などは不要
+  Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+  Udp.write(send_packet, send_len);
+  Udp.endPacket();
+}
+
 
 void UDP_FAIL_CHECK()
 {
@@ -575,6 +724,7 @@ void loop()
   int packetSize = Udp.parsePacket();
   if (packetSize)
   {
-    UDP_read_write(packetSize);
+    //UDP_read_write(packetSize); // string
+    UDP_read_write_binary(packetSize); // binary
   }
 }
