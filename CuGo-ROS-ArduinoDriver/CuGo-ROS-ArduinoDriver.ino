@@ -52,7 +52,7 @@ const bool R_reverse = false;
 #define UDP_HEADER_SIZE 8 // UDP binary用のheaderサイズ
 //char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; // 来たメッセージのサイズだけ確保。送る側で大きすぎるものは送らないものとする
 char packetBuffer[UDP_BUFF_SIZE]; // UDP string用のバッファ
-uint8_t packetBinaryBuffer[UDP_BIN_BUFF_SIZE]; // UDP binary用のバッファ
+uint8_t packetBinaryBuffer[UDP_HEADER_SIZE + UDP_BIN_BUFF_SIZE]; // UDP binary用のバッファ
 char ReplyBuffer[] = "Initial Buffer Value!";      // 初期値。これが通常通信できたらバグ。
 EthernetUDP Udp;
 
@@ -511,6 +511,13 @@ bool read_bool_from_buf(uint8_t* buf, const int TARGET)
   return val;
 }
 
+uint16_t read_uint16_t_from_header(uint8_t* buf, const int TARGET)
+{
+  if(TARGET >= UDP_HEADER_SIZE-1) return 0;
+  uint16_t val = *reinterpret_cast<uint16_t*>(buf + TARGET);
+  return val;
+}
+
 
 /* 工事中
   void recieve_serial_cmd()
@@ -545,9 +552,9 @@ void set_motor_cmd(String reciev_str)
 }
 
 
-void set_motor_cmd_binary(uint8_t* reciev_buf)
+void set_motor_cmd_binary(uint8_t* reciev_buf, int size)
 {
-  if (reciev_buf != NULL)
+  if (size > 0)
   {
     // 2輪の場合
     float sp_reciev_float[2];
@@ -641,26 +648,29 @@ void UDP_read_write_binary(int packetSize)
 {
   // バッファにたまったデータを抜き出して制御に適用
   Udp.read(packetBinaryBuffer, UDP_HEADER_SIZE + UDP_BIN_BUFF_SIZE);
-  uint16_t recv_checksum = (*(uint16_t*)(packetBinaryBuffer+RECV_HEADER_CHECKSUM_PTR));
+  int size = sizeof(packetBinaryBuffer) / sizeof(uint8_t);
+  // チェックサムの確認
+  uint16_t recv_checksum = read_uint16_t_from_header(packetBinaryBuffer, RECV_HEADER_CHECKSUM_PTR);
   uint16_t calc_checksum = calculate_checksum(packetBinaryBuffer, UDP_HEADER_SIZE + UDP_BIN_BUFF_SIZE, UDP_HEADER_SIZE);
   if(recv_checksum != calc_checksum)
   {
     Serial.println("Packet integrity check failed");
-    // TODO 処理の要検討
-    // return;
   }
   else
   {
-    set_motor_cmd_binary(packetBinaryBuffer);
+    set_motor_cmd_binary(packetBinaryBuffer, size);
   }
 
   // 送信用のデータを整理
   // 送信ボディの作成
   uint8_t send_body[UDP_BIN_BUFF_SIZE];
+  // 送信ボディの初期化
   memset(send_body, 0, sizeof(send_body));
+  // ボディへ送信データの書き込み
   write_float_to_buf(send_body, SEND_ENCODER_L_PTR, motor_controllers[MOTOR_LEFT].getCount());
   write_float_to_buf(send_body, SEND_ENCODER_R_PTR, motor_controllers[MOTOR_RIGHT].getCount());
 
+  // チェックサムの計算
   uint16_t checksum = calculate_checksum(send_body, UDP_BIN_BUFF_SIZE);
   uint16_t send_len = UDP_HEADER_SIZE + UDP_BIN_BUFF_SIZE;
   // 送信ヘッダの作成
