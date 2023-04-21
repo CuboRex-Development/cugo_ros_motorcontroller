@@ -65,8 +65,8 @@ EthernetUDP Udp;
 #define SEND_ENCODER_L_PTR 0 // 左エンコーダ回転数
 #define SEND_ENCODER_R_PTR 4 // 右エンコーダ回転数
 
-#define PIN_MOTOR_L A1  // モータ出力ピン(L)
-#define PIN_MOTOR_R A0  // モータ出力ピン(R)
+#define PIN_MOTOR_L A0  // モータ出力ピン(L)
+#define PIN_MOTOR_R A1  // モータ出力ピン(R)
 #define PIN_ENCODER_L_A 2  // エンコーダ割り込み入力ピン(L)
 #define PIN_ENCODER_L_B 8  // エンコーダ回転方向入力ピン(L)
 #define PIN_ENCODER_R_A 3  // エンコーダ割り込み入力ピン(R)
