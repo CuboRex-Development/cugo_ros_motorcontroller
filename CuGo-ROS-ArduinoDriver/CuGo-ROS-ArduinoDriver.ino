@@ -42,8 +42,8 @@ const float L_LPF = 0.95;
 const float R_LPF = 0.95;
 
 // 回転方向ソフトウェア切り替え
-const bool L_reverse = true;
-const bool R_reverse = false;
+const bool L_reverse = false;
+const bool R_reverse = true;
 
 /***** ↑各ユーザーごとに設定してください↑ *****/
 
