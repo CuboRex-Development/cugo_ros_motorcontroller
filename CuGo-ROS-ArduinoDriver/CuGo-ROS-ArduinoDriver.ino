@@ -17,7 +17,7 @@ bool FAIL_SAFE_DISPLAY = true;
 byte mac[] = {0xA8, 0x61, 0x0A, 0xAE, 0x73, 0x1A};  // お持ちのArduinoShield相当の端末のアドレスを記入
 
 // ROSアプリケーションと同じ値にしてください。
-IPAddress ip(192, 168, 8, 216);     // Arduinoのアドレス。LAN内でかぶらない値にすること。
+IPAddress ip(192, 168, 11, 216);     // Arduinoのアドレス。LAN内でかぶらない値にすること。
 unsigned int localPort = 8888;      // 8888番ポートを聞いて待つ
 
 // PID ゲイン調整
