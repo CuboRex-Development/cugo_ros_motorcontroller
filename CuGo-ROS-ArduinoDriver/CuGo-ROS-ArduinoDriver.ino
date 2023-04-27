@@ -91,6 +91,12 @@ MotorController motor_controllers[2];
 
 #define ROS_MODE_IN   1700  // ROSモードに入るときの閾値(us) (1100~1900/中央1500)
 #define ROS_MODE_OUT  1300  // ROMモードから抜けるときの閾値(us) (1100~1900/中央1500)
+#define CUGO_PROPO_MAX_A 2200
+#define CUGO_PROPO_MIN_A 800
+#define CUGO_PROPO_MAX_B 1900
+#define CUGO_PROPO_MIN_B 1100
+#define CUGO_PROPO_MAX_C 2200
+#define CUGO_PROPO_MIN_C 800
 
 // 動作モード定義
 typedef enum {
@@ -104,6 +110,7 @@ volatile unsigned long time[PWM_IN_MAX];
 int OLD_PWM_IN_PIN0_VALUE;   // プロポスティック入力値(L)
 int OLD_PWM_IN_PIN1_VALUE;   // プロポスティック入力値(MODE)
 int OLD_PWM_IN_PIN2_VALUE;   // プロポスティック入力値(R)
+
 RUN_MODE runMode = RC_MODE;  // 初回起動時はRC_MODE（無意識な暴走を防ぐため）
 
 // FAIL SAFE
@@ -379,8 +386,10 @@ void rc_mode()
 {
   digitalWrite(LED_BUILTIN, LOW); // RC_MODEでLED消灯
   // 値をそのままへESCへ出力する
-  motor_direct_instructions(rcTime[0], rcTime[2]);
- // Serial.println("input cmd:" + String(rcTime[0]) + ", " + String(rcTime[2]));
+  if ((rcTime[0] < CUGO_PROPO_MAX_A && rcTime[0] > CUGO_PROPO_MIN_A) && (rcTime[2] < CUGO_PROPO_MAX_C && rcTime[2] > CUGO_PROPO_MIN_C) ) {
+    motor_direct_instructions(rcTime[0], rcTime[2]);
+    // Serial.println("input cmd:" + String(rcTime[0]) + ", " + String(rcTime[2]));
+  }
 }
 
 
@@ -393,7 +402,7 @@ void check_mode_change()
   interrupts();     //割り込み開始
 
   // chBでモードの切り替え
-  if (ROS_MODE_IN < rcTime[1])
+  if (ROS_MODE_IN < rcTime[1]  && rcTime[1] < CUGO_PROPO_MAX_B) // MR-8の外れ値が入ったときは遷移させない
   {
     if (runMode != ROS_MODE)
     { // モードが変わった時(RC→ROS)
@@ -402,7 +411,7 @@ void check_mode_change()
     reset_pid_gain();
     runMode = ROS_MODE;
   }
-  else if (ROS_MODE_OUT > rcTime[1])
+  else if (ROS_MODE_OUT > rcTime[1] && CUGO_PROPO_MIN_B < rcTime[1]) // MR-8の外れ値が入ったときは遷移させない
   {
     if (runMode != RC_MODE)
     { // モードが変わった時(ROS→RC)
@@ -513,7 +522,7 @@ bool read_bool_from_buf(uint8_t* buf, const int TARGET)
 
 uint16_t read_uint16_t_from_header(uint8_t* buf, const int TARGET)
 {
-  if(TARGET >= UDP_HEADER_SIZE-1) return 0;
+  if (TARGET >= UDP_HEADER_SIZE - 1) return 0;
   uint16_t val = *reinterpret_cast<uint16_t*>(buf + TARGET);
   return val;
 }
@@ -605,7 +614,7 @@ uint16_t calculate_checksum(const void* data, size_t size, size_t start = 0)
   // バイト列を2バイトずつ加算
   for (size_t i = start; i < size; i += 2)
   {
-    checksum += (bytes[i] << 8) | bytes[i+1];
+    checksum += (bytes[i] << 8) | bytes[i + 1];
   }
   // 桁あふれがあった場合は回収
   checksum = (checksum & 0xFFFF) + (checksum >> 16);
@@ -618,7 +627,7 @@ void create_UDP_packet(uint8_t* packet, uint16_t* header, uint8_t* body)
 {
   size_t offset = 0;
   memmove(packet, header, sizeof(uint8_t)*UDP_HEADER_SIZE);
-  offset += sizeof(uint8_t)*UDP_HEADER_SIZE;
+  offset += sizeof(uint8_t) * UDP_HEADER_SIZE;
   memmove(packet + offset, body, sizeof(uint8_t)*UDP_BIN_BUFF_SIZE);
 }
 
@@ -652,7 +661,7 @@ void UDP_read_write_binary(int packetSize)
   // チェックサムの確認
   uint16_t recv_checksum = read_uint16_t_from_header(packetBinaryBuffer, RECV_HEADER_CHECKSUM_PTR);
   uint16_t calc_checksum = calculate_checksum(packetBinaryBuffer, UDP_HEADER_SIZE + UDP_BIN_BUFF_SIZE, UDP_HEADER_SIZE);
-  if(recv_checksum != calc_checksum)
+  if (recv_checksum != calc_checksum)
   {
     Serial.println("Packet integrity check failed");
   }
