@@ -1,15 +1,18 @@
+![_DSC0521](https://user-images.githubusercontent.com/22425319/234768864-03dacbd2-171a-4932-8552-271770513bb8.JPG)
+
 # cugo-ros-arduinodriver
 CuGoをROSで制御する際、ROS開発キットに付属するArduinoのリファレンススケッチです。セットでROSアプリと同時に使用します。  
-ROSpkgのリポジトリはこちら：https://github.com/CuboRex-Development/cugo-ros-controller.git  
-English Documents here：   
-正式リリースするまでは、beta branchで管理しますので、そちらをご参照ください。
+ROSpkgのリポジトリはこちら：https://github.com/CuboRex-Development/cugo-ros-controller  
+English Documents here：not yet  
  
 # Features
-CuGo-ROS-Controller-pkgと使うと/cmd_velのベクトルでCuGoの制御を行います。  
-また、遠隔操作ロボットキット付属のMC-8のプロポを用いて、RC操作と自律走行の切り替えを実施できます。RC-MODEに切り替えることで
-無線コントローラで緊急停止と同じ操作ができます。
+CuGo-ROS-Controller-pkgと使うと/cmd_velのベクトルをそれぞれL/Rの回転数に変換しrpmとしてArduinoに送られてきます。その必要rpmを達成する制御をこのCuGO-ROS-ArduinoDriverで実施します。  
+また、CuGoROS開発キット付属のMC-8のプロポを用いて、RC操作と自律走行の切り替えを実施できます。左スティックを左に倒すことでラジコン操作を受け付けるRC-MODEに、右に倒すことでROSの速度ベクトルをCuGoに伝えるROS-MODEに切り替えることができます。自律走行中に、誤った判断をし障害物に衝突しそうなシーンでは、コントローラよりRC-MODEに変更することでラジコン操作に即時に切り替えることができ、緊急停止と同じ操作ができます。  
+![image](https://user-images.githubusercontent.com/22425319/234765585-23458585-ea44-40d5-b71f-395c93509fc8.png)
 
-切り替え説明の画像
+# System
+ROSを使用したロボットシステムでは、以下の図のように、LinuxPCとの通信はEthernetを使用したUDPプロトコルで行います。ROS開発キット以外でご活用の際には、PC-Arduinoの間にIPを割り振るDHCPサーバの機能があるルータを挟むか、PC-Arduino間で名前解決する構造にしてください。  
+![system](https://user-images.githubusercontent.com/22425319/234768207-93dd7840-2d6f-4fbc-96f8-6960f93b9192.png)
 
 # Requirement
 ハードウェア
@@ -27,7 +30,7 @@ Arduino標準ライブラリ
  
 # Usage
  
-cugo-ros-arduinodriver.inoのヘッダ部分にある設定係数を入力して、ArduinoIDEで書き込みを行ってください。
+cugo-ros-arduinodriver.inoのコード上部にある設定係数を入力して、ArduinoIDEで書き込みを行ってください。
 
 設定できる項目は以下の通りです。
 ~~~
