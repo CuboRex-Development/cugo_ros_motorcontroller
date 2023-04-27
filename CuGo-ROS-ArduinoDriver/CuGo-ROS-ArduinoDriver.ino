@@ -21,21 +21,19 @@ IPAddress ip(192, 168, 11, 216);     // Arduinoのアドレス。LAN内でかぶ
 unsigned int localPort = 8888;      // 8888番ポートを聞いて待つ
 
 // PID ゲイン調整
-// L側
-//const float L_KP = 1.5;  CuGoV3
-//const float L_KI = 0.02; CuGoV3
-//const float L_KD = 0.1;  CuGoV3
-const float L_KP = 1.0;
-const float L_KI = 0.06;
-const float L_KD = 0.1;
+const float L_KP = 1.5;  //CuGoV3
+const float L_KI = 0.02; //CuGoV3
+const float L_KD = 0.1;  //CuGoV3
+const float R_KP = 1.5;  //CuGoV3
+const float R_KI = 0.02; //CuGoV3
+const float R_KD = 0.1;  //CuGoV3
 
-// R側
-const float R_KP = 1.0;
-const float R_KI = 0.06;
-const float R_KD = 0.1;
-//const float R_KP = 1.5;  CuGoV3
-//const float R_KI = 0.02; CuGoV3
-//const float R_KD = 0.1;  CuGoV3
+//const float L_KP = 1.0; // CuGoMEGA
+//const float L_KI = 0.06; // CuGoMEGA
+//const float L_KD = 0.1; // CuGoMEGA
+//const float R_KP = 1.0; // CuGoMEGA
+//const float R_KI = 0.06; // CuGoMEGA
+//const float R_KD = 0.1; // CuGoMEGA
 
 // ローパスフィルタ
 const float L_LPF = 0.95;
