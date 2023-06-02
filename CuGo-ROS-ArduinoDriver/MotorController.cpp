@@ -75,8 +75,12 @@ void MotorController::driveMotor(){
 void MotorController::reset_PID_param()
 {
   speed_ = 0;
-  enc_ = 0; //Cugoびくつき修正:23/02/12
-  prev_enc_ = 0;  //Cugoびくつき修正:23/02/12
+  // 2023/6/2
+  // TODO: びくつき修正で問答無用にカウンタをゼロにしてしまう。
+  // 今までの積算したカウンタ->0に変化するため、オドメトリに数十mのベクトルが生成されてしまう。
+  // びくつきが軽微であるため、コメントアウトするが、対策が必要
+  //enc_ = 0; //Cugoびくつき修正:23/02/12
+  //prev_enc_ = 0;  //Cugoびくつき修正:23/02/12
   rpm_ = 0.0;
   prev_rpm_ = 0.0;
   target_rpm_ = 0.0;
