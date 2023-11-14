@@ -113,6 +113,8 @@ void MotorController::setTargetRpm(float target_rpm){
   if(!initialized_){
     return;
   }
+  // --------
+  // if(target_rpm_ * target_rpm < 0.0) prev_i_ = 0.0;
   target_rpm_ = target_rpm;
 }
 
@@ -282,7 +284,11 @@ float MotorController::limitSpeed(){
     return -1.0;
   }
   float surplus; //Iゲイン自動整合用の余剰制御量を算出
-  surplus = speed_ - max_speed_;
+  if (speed_ > 0){
+    surplus = speed_ - max_speed_;
+  }else{
+    surplus = speed_ + max_speed_;
+  }
   
   // speed_ を範囲内に調整
   if(speed_ > max_speed_){

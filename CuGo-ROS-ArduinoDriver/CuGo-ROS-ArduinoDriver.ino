@@ -21,12 +21,19 @@ IPAddress ip(192, 168, 11, 216);     // Arduinoのアドレス。LAN内でかぶ
 unsigned int localPort = 8888;      // 8888番ポートを聞いて待つ
 
 // PID ゲイン調整
-const float L_KP = 1.5;  //CuGoV3
-const float L_KI = 0.02; //CuGoV3
-const float L_KD = 0.1;  //CuGoV3
-const float R_KP = 1.5;  //CuGoV3
-const float R_KI = 0.02; //CuGoV3
-const float R_KD = 0.1;  //CuGoV3
+// const float L_KP = 1.5;  //CuGoV3
+// const float L_KI = 0.02; //CuGoV3
+// const float L_KD = 0.1;  //CuGoV3
+// const float R_KP = 1.5;  //CuGoV3
+// const float R_KI = 0.02; //CuGoV3
+// const float R_KD = 0.1;  //CuGoV3
+
+const float L_KP = 2.0 ;  //CuGoV3
+const float R_KP = 2.0 ;  //CuGoV3
+const float L_KI = 0.1 ; //CuGoV3
+const float R_KI = 0.1 ; //CuGoV3
+const float L_KD =-0.15 ;  //CuGoV3
+const float R_KD =-0.15 ;  //CuGoV3
 
 //const float L_KP = 1.0; // CuGoMEGA
 //const float L_KI = 0.06; // CuGoMEGA
@@ -109,7 +116,8 @@ int OLD_PWM_IN_PIN0_VALUE;   // プロポスティック入力値(L)
 int OLD_PWM_IN_PIN1_VALUE;   // プロポスティック入力値(MODE)
 int OLD_PWM_IN_PIN2_VALUE;   // プロポスティック入力値(R)
 
-RUN_MODE runMode = RC_MODE;  // 初回起動時はRC_MODE（無意識な暴走を防ぐため）
+RUN_MODE runMode = ROS_MODE;  // 初回起動時はRC_MODE（無意識な暴走を防ぐため）
+// RUN_MODE runMode = RC_MODE;  // 初回起動時はRC_MODE（無意識な暴走を防ぐため）
 
 // FAIL SAFE
 int UDP_FAIL_COUNT = 0;
