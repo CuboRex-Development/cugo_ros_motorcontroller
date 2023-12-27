@@ -56,7 +56,7 @@ uint8_t packetBinaryBuffer[UDP_HEADER_SIZE + UDP_BIN_BUFF_SIZE]; // UDP binary�
 char ReplyBuffer[] = "Initial Buffer Value!";      // 初期値。これが通常通信できたらバグ。
 EthernetUDP Udp;
 
-#define SERIAL_BIN_BUFF_SIZE 56 // UDP binary用のバッファ(body)サイズ
+#define SERIAL_BIN_BUFF_SIZE 64 // UDP binary用のバッファ(body)サイズ
 #define SERIAL_HEADER_SIZE 8 // UDP binary用のheaderサイズ
 uint8_t packetBinaryBufferSerial[SERIAL_HEADER_SIZE + SERIAL_BIN_BUFF_SIZE]; // UDP binary用のバッファ
 PacketSerial packetSerial;
