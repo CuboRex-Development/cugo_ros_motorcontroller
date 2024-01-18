@@ -1,9 +1,9 @@
 ![_DSC0521](https://user-images.githubusercontent.com/22425319/234768864-03dacbd2-171a-4932-8552-271770513bb8.JPG)
 
-# cugo-ros-arduinodriver
+# cugo_ros_motorcontroller
 CuGoをROSで制御する際、ROS開発キットに付属するArduinoのリファレンススケッチです。セットでROSアプリと同時に使用します。  
 ROSpkgのリポジトリはこちら：https://github.com/CuboRex-Development/cugo-ros-controller  
-English Documents here：not yet  
+### このArduinoスケッチはROS開発キット専用です。クローラロボット開発プラットフォームの方はこちらを参照してください：https://github.com/CuboRex-Development/cugo_ros_motorcontroller/tree/pico-usb
  
 # Features
 CuGo-ROS-Controller-pkgと使うと/cmd_velのベクトルをそれぞれL/Rの回転数に変換しrpmとしてArduinoに送られてきます。その必要rpmを達成する制御をこのCuGO-ROS-ArduinoDriverで実施します。  
