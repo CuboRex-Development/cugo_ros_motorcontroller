@@ -1,7 +1,7 @@
 ![image](https://github.com/CuboRex-Development/cugo_ros_control/assets/97714660/a2525198-fa61-4c4d-9a0f-7dd6824fa625)
 
 # cugo_ros_motorcontroller
-クローラロボット開発プラットフォームでROSの制御をするRaspberryPiPicoのリファレンススケッチです。セットでROSパッケージの[cugo_ros_control](https://github.com/CuboRex-Development/cugo-ros-controller)と使用します。
+ROSでクローラロボット開発プラットフォームを制御するRaspberryPiPicoのリファレンススケッチです。セットでROSパッケージの[cugo_ros_control](https://github.com/CuboRex-Development/cugo-ros-controller)と使用します。
 
 
 ### このArduinoスケッチはクローラロボット開発プラットフォーム専用です。
@@ -19,7 +19,12 @@ RaspberryPiPicoに書き込みさえしてあれば、PCのROSパッケージ[cu
 ![image](https://user-images.githubusercontent.com/22425319/234765585-23458585-ea44-40d5-b71f-395c93509fc8.png)
 
 #### 対応製品
-CuboRex製品では、“ROS開発キット CuGo V3”、“クローラロボット開発プラットフォーム CuGo V4”、“クローラロボット開発プラットフォーム CuGo V3i”でお使いいただけます。それぞれ使用するコードが異なることがありますので、下記表からご参照ください。
+CuboRex製品では、
+* ROS開発キット CuGo V3
+* クローラロボット開発プラットフォーム CuGo V4
+* クローラロボット開発プラットフォーム CuGo V3i
+
+でお使いいただけます。それぞれ使用するコードが異なることがありますので、下記表からご参照ください。
 
 ここでは、“クローラロボット開発プラットフォーム CuGo V4”と“クローラロボット開発プラットフォーム CuGo V3i”は“クローラロボット開発プラットフォーム”と総称します。
 
@@ -55,7 +60,7 @@ Arduino標準ライブラリ
  
 # Usage
 ArduinoIDEでRaspberryPiPicoにスケッチを書き込んでください。
-RaspberryPiPicoに書き込みさえしてあれば、PCのROSパッケージ[cugo_ros_control](https://github.com/CuboRex-Development/cugo_ros_control)側で通信を開始すると、自動的にROSと通信します。
+スケッチが書き込み済みであれば、PC側ROSパッケージ[cugo_ros_control](https://github.com/CuboRex-Development/cugo_ros_control)側で通信を開始すると、RaspberryPiPicoが自動的にROSと通信します。
 
 # Note
 ご不明点がございましたら、[issues](https://github.com/CuboRex-Development/cugo_ros_control/issues)にてお問い合わせください。回答いたします。
